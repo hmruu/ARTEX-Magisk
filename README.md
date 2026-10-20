@@ -317,6 +317,3 @@ module/
 - 应用：[ARTEX](https://github.com/Autumn-27/ARTEX)（上游作者 Autumn-27）
 - 容器基础：Debian 12 arm64（LXC 官方镜像）
 - 本模块的打包脚本、rootfs 裁剪、SysV 垫片为本项目原创部分。
-
-本仓库只包含打包产物与胶水脚本，**ARTEX 本体的授权请遵循上游项目的 LICENSE**；
-模块脚本部分建议同样以 MIT 发布（请按你的仓库实际声明修改本段）。# ARTEX-Magisk
