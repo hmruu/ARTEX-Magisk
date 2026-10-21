@@ -1,11 +1,16 @@
 # ARTEX Magisk 模块 · Android 上的 AI 渗透测试平台
 
-> 把 [ARTEX](https://github.com/Autumn-27/ARTEX)（AI 自主渗透测试系统，Go + Next.js）打包成
+> 把 **ARTEX**（AI 自主渗透测试系统，Go 后端 + Next.js 前端）打包成
 > **一个可刷入的 Magisk 模块**：设备里跑起一个 Debian 12 容器，容器内自带 PostgreSQL 15，
 > 开机自启，浏览器打开 `http://手机IP:8787` 随时使用。
 >
-> **本项目是第三方打包，与 ARTEX 上游项目无隶属关系。** 上游是 Web 应用，本项目只负责
-> 「在 Android 上把它装起来、跑起来、开机就在、数据不丢」。
+> **本项目是第三方打包，与 ARTEX 作者无隶属关系。** 上游仓库已由作者删除，
+> 本仓库只负责「在 Android 上把它装起来、跑起来、开机就在、数据不丢」。
+
+> [!NOTE]
+> **上游状态**：ARTEX 原仓库 `Autumn-27/ARTEX` 已被作者删除，文档中不再提供指向它的链接
+> （旧链接均为 404）。文中 `v0.3.15` 对应删除前最后一个可用版本，二进制、前端与 skills
+> 均来自该版本。ARTEX 采用 **AGPL-3.0** 许可，再分发相关约定见文末「来源与许可」。
 
 ![platform](https://img.shields.io/badge/platform-arm64-blue)
 ![android](https://img.shields.io/badge/Android-10%2B-brightgreen)
@@ -41,7 +46,7 @@ Android 14 (实测) · arm64 · Magisk / KernelSU / APatch · Debian 12 + Postgr
 
 ## 它解决了什么问题
 
-ARTEX 上游给的部署方式是 Docker 或「本地编译 + 自备 PostgreSQL」，
+ARTEX 原本的部署方式是 Docker，或者「自己编译 + 自备 PostgreSQL」——
 在 Android 上两条路都走不通：
 
 | 障碍 | 本项目怎么绕过去的 |
@@ -79,7 +84,7 @@ ARTEX 上游给的部署方式是 Docker 或「本地编译 + 自备 PostgreSQL�
 
 ### 方式一：Magisk 应用（推荐）
 
-1. 到 [Releases](../../releases/latest) 下载 `artex-magisk-*.zip`（约 144 MB）。
+1. 到 [Releases](../../releases/latest) 下载 `artex-magisk-v3.zip`（约 144 MB，SHA256 见 Release 说明）。
 2. Magisk 应用 → **模块** → **从本地安装** → 选择 zip。
 3. 重启设备。
 4. 浏览器访问 `http://<手机局域网IP>:8787`，首次进入会要求**设置访问密码**。
@@ -87,7 +92,7 @@ ARTEX 上游给的部署方式是 Docker 或「本地编译 + 自备 PostgreSQL�
 ### 方式二：命令行
 
 ```sh
-su -c 'magisk --install-module /sdcard/Download/artex-magisk-v0.3.15-r3.zip'
+su -c 'magisk --install-module /sdcard/Download/artex-magisk-v3.zip'
 # 命令行安装会先进 modules_update，重启后生效；也可以手动搬家后直接启动：
 su -c 'cp -a /data/adb/modules_update/artex/. /data/adb/modules/artex/ && rm -rf /data/adb/modules_update/artex && sh /data/adb/modules/artex/service.sh'
 ```
@@ -268,7 +273,8 @@ apt 包在 rootfs 里，会被重写；包名记录在 `/data/adb/artex/apt-pack
 构建过程中的难点是「Android 上跑不了 glibc 程序」，所以编译全部在 Debian 容器里做。
 
 ```sh
-# 0) 准备：Debian 12 arm64 rootfs（见 scripts/build-rootfs.sh）+ 官方 Go / Node arm64 tarball
+# 0) 准备：ARTEX 源码（上游已删库，用你自己的副本）
+#    + Debian 12 arm64 rootfs（LXC 官方镜像解包后按需裁剪）+ 官方 Go / Node arm64 tarball
 # 1) 前端静态导出（在容器里跑，Next 需要的 SWC 只有 linux/arm64 版本）
 cd web && npm ci && NEXT_EXPORT=1 npx next build && cd ..
 rm -rf server/webui/dist && cp -a web/out/. server/webui/dist/
@@ -277,9 +283,15 @@ rm -rf server/webui/dist && cp -a web/out/. server/webui/dist/
 CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -tags embedui -trimpath \
   -ldflags "-s -w -buildid= -X main.version=v0.3.15" -o out/artex ./cmd/artex
 
-# 3) 组装模块 zip
-./scripts/package.sh    # 把 rootfs.tar.xz + app/ + 脚本打进 artex-magisk-*.zip
+# 3) 组装模块 zip（本仓库根目录 = 模块根）
+cp out/artex files/app/artex                      # 后端二进制
+printf 'debian12-pg15-v2\n' > files/rootfs.version # 容器版本标记（变了才会重解压）
+tar -cJf files/rootfs.tar.xz -C /path/to/rootfs .
+zip -r -9 artex-magisk-v3.zip module.prop customize.sh common.sh service.sh \
+    action.sh tools.sh uninstall.sh files META-INF README.md docs
 ```
+
+> 目录 `scripts/` 里的辅助脚本（rootfs 构建、打包）暂未随仓库发布；上面的命令是最小可复现流程。
 
 模块源码结构：
 
@@ -311,12 +323,35 @@ CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -tags embedui -trimpath \
 | v0.3.15-r3 | 预装 Python 3.11 + Node 24 + 常用 CLI；引入持久化工具层与 `tools.sh`；文档补全 |
 | v0.3.15-r2 | rootfs 重做（裁剪 + PG15 调优），数据目录与 rootfs 解耦 |
 | v0.3.15-r1 | 首个可用版本：Debian 12 容器 + PG15 + ARTEX 单二进制，开机自启 |
+## 来源与许可
 
-## 致谢与许可
+### 组成与来源
 
-- 应用：[ARTEX](https://github.com/Autumn-27/ARTEX)（上游作者 Autumn-27）
-- 容器基础：Debian 12 arm64（LXC 官方镜像）
-- 本模块的打包脚本、rootfs 裁剪、SysV 垫片为本项目原创部分。
+| 部分 | 来源 | 许可 |
+| :--- | :--- | :--- |
+| ARTEX 后端 / 前端 / skills | Autumn-27 开发，**上游仓库已被作者删除** | **AGPL-3.0** |
+| 容器基础（Debian 12 arm64） | LXC 官方镜像 → 裁剪 | 各组件自由许可（Debian） |
+| PostgreSQL 15 | Debian 官方仓库 | PostgreSQL License |
+| Node.js 24 / Python 3.11 | 官方发行版 / Debian 仓库 | MIT / PSF License |
+| 本仓库胶水脚本 | 本项目原创 | MIT（见下） |
+| `libsysv-shim.so` 及其源码 | 本项目原创 | MIT（见下） |
 
-本仓库只包含打包产物与胶水脚本，**ARTEX 本体的授权请遵循上游项目的 LICENSE**；
-模块脚本部分建议同样以 MIT 发布（请按你的仓库实际声明修改本段）。
+### 许可证说明（请认真读）
+
+- **ARTEX 本体是 AGPL-3.0**。本仓库 Release 中的 `artex` 二进制、内嵌前端与 skills 都是该作品的
+  编译/打包产物，**不是本项目重新授权**。
+- AGPL-3.0 对「再分发」有明确要求：随分发提供**对应源代码**、保留版权与许可声明、
+  并让接收方同样能在 AGPL 下获得该作品（通过网络提供服务的场景另有源码提供义务）。
+  由于**上游仓库已被删除**，本仓库并不包含 ARTEX 源码；因此：
+  - 只想自己用 → 私有仓库或本地保留即可，不构成再分发；
+  - 要公开发布二进制 → 请自行补齐源码获取方式（附上你构建时使用的源码树 / 归档），
+    或移除公开 Release 中的二进制，只保留脚本与本说明。
+- **本仓库原创部分**（`customize.sh`、`common.sh`、`service.sh`、`action.sh`、`tools.sh`、
+  `uninstall.sh`、rootfs 裁剪流程、`files/app/shim/*.c` 与本文档）按 **MIT** 许可使用；
+  如需正式声明，请在仓库根目录添加 `LICENSE` 文件。
+- 本项目与 ARTEX 作者**无隶属关系，也未获得其背书**；文中不再提供上游链接（链接已失效）。
+
+### 致谢
+
+- Autumn-27：ARTEX 的设计与实现（AI 自主渗透测试系统）。
+- Debian / PostgreSQL / Node.js / Python 社区：本模块赖以运行的容器与运行时。
