@@ -330,6 +330,7 @@ zip -r -9 artex-magisk-v3.zip module.prop customize.sh common.sh service.sh \
 | 部分 | 来源 | 许可 |
 | :--- | :--- | :--- |
 | ARTEX 后端 / 前端 / skills | Autumn-27 开发，**上游仓库已被作者删除** | **AGPL-3.0** |
+| 对应源码（`source-v0.3.15` 分支 / `v0.3.15-source` 标签） | 同上，随二进制随仓库提供 | **AGPL-3.0** |
 | 容器基础（Debian 12 arm64） | LXC 官方镜像 → 裁剪 | 各组件自由许可（Debian） |
 | PostgreSQL 15 | Debian 官方仓库 | PostgreSQL License |
 | Node.js 24 / Python 3.11 | 官方发行版 / Debian 仓库 | MIT / PSF License |
@@ -340,12 +341,16 @@ zip -r -9 artex-magisk-v3.zip module.prop customize.sh common.sh service.sh \
 
 - **ARTEX 本体是 AGPL-3.0**。本仓库 Release 中的 `artex` 二进制、内嵌前端与 skills 都是该作品的
   编译/打包产物，**不是本项目重新授权**。
-- AGPL-3.0 对「再分发」有明确要求：随分发提供**对应源代码**、保留版权与许可声明、
-  并让接收方同样能在 AGPL 下获得该作品（通过网络提供服务的场景另有源码提供义务）。
-  由于**上游仓库已被删除**，本仓库并不包含 ARTEX 源码；因此：
-  - 只想自己用 → 私有仓库或本地保留即可，不构成再分发；
-  - 要公开发布二进制 → 请自行补齐源码获取方式（附上你构建时使用的源码树 / 归档），
-    或移除公开 Release 中的二进制，只保留脚本与本说明。
+- **对应源码已随仓库提供**（AGPL-3.0 第 6 条）：
+  分支 [`source-v0.3.15`](../../tree/source-v0.3.15) · 标签 [`v0.3.15-source`](../../tree/v0.3.15-source)，
+  共 600 个文件，未做任何代码修改；根目录 `SOURCE.md` 写明构建环境与命令，
+  `LICENSE` 为 AGPL-3.0 全文。
+  归档直链：[`v0.3.15-source.tar.gz`](../../archive/refs/tags/v0.3.15-source.tar.gz)（约 5.7 MB）。
+  需要固定引用时用提交 `ce5ec3a50acd865e0deebff4f305329235dd8c86`。
+  未纳入 1 个演示截图 `web/media/dashboard.png`（1.2 MB，源码中无引用、构建不需要），原因与校验值写在 `SOURCE.md`。
+- AGPL-3.0 对「再分发」另外要求保留版权与许可声明；以本作品运行对外网络服务时（第 13 条），
+  还需向使用者提供该源码。**如果你 fork 后要公开发布二进制，请连同该源码归档一起提供**；
+  只想自己用 → 私有仓库或本地保留即可，不构成再分发。
 - **本仓库原创部分**（`customize.sh`、`common.sh`、`service.sh`、`action.sh`、`tools.sh`、
   `uninstall.sh`、rootfs 裁剪流程、`files/app/shim/*.c` 与本文档）按 **MIT** 许可使用；
   如需正式声明，请在仓库根目录添加 `LICENSE` 文件。
