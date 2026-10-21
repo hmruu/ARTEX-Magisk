@@ -1,0 +1,36 @@
+MIT License
+
+Copyright (c) 2026 hmruu
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+适用范围（很重要，别被上面的 MIT 标题误导）
+
+上面这份 MIT 只覆盖本仓库里由本仓库作者编写的部分：
+customize.sh / common.sh / service.sh / action.sh / tools.sh / uninstall.sh、
+META-INF 安装器入口、files/app/shim/*.c、files/app/config.json 以及文档。
+
+以下内容不适用 MIT：
+
+- files/app/skills/ ：来自 ARTEX，AGPL-3.0。
+- Release 里的 artex 二进制与内嵌前端：ARTEX 的编译产物，按 AGPL-3.0 分发。
+  对应源码在 source-v0.3.15 分支 / v0.3.15-source 标签，AGPL-3.0 全文在源码树里的 LICENSE。
+- rootfs 里的 Debian / PostgreSQL / Node.js / Python 等：各自原许可。
