@@ -1,0 +1,7 @@
+# 构建产物 / 大文件：走 Releases，不进 Git
+*.zip
+files/rootfs.tar.xz
+files/app/artex
+rootfs*.tar.xz
+*.log
+.DS_Store
