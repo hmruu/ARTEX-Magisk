@@ -1,0 +1,6 @@
+id=artex
+name=ARTEX 渗透测试平台
+version=v0.3.15-r3
+versionCode=3
+author=ARTEX
+description=在 Android 设备上以 root 权限容器化（Debian 12 + PostgreSQL 15）运行 ARTEX，开机自启，浏览器访问 http://设备IP:8787
